@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
-# Shell script to start the SSH conection
-#ssh -i ~/.ssh/id_rsa ubuntu@18.207.135.241 ubuntu@54.147.143.45
+# We add a custom error page.
+sudo apt-get update
+sudo apt-get install -y nginx
+sudo chown -R ubuntu /var/www
+echo "Hello World!" > /var/www/html/index.nginx-debian.html
+echo "Ceci n'est pas une page" > /var/www/html/custom_404.html
 
-# Load balancer server name and IP
-## lb-01 34.204.166.49
+sed -i '/listen 80 default_server/ a\ \trewrite ^/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;' /etc/nginx/sites-available/default
 
-# Install nginx
-sudo apt-get -y update
-sudo apt-get -y install nginx
-echo "Hello World" > sudo /var/www/html/index.html
+sed -i "/listen 80 default_server/ a\  \terror_page 404 /custom_404.html;" /etc/nginx/sites-available/default
 
-# Configure Nginx so that its HTTP response contains a custom header
-# The name of the custom HTTP header must be "X-Served-By" and the server runnning on
-# (Ex:) X-Served-By: 03-web-02
-sudo sed -i '29 a add_header X-Served-By $hostname;' /etc/nginx/nginx.conf
+sed -i "/listen 80 default_server/ a\ \tadd_header X-Served-By $HOSTNAME;" /etc/nginx/sites-available/default
 
-# Restart
 sudo service nginx restart
